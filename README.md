@@ -15,30 +15,29 @@ This project demonstrates how to build a scalable and maintainable Data Warehous
 - Star Schema Modeling for BI and analytics
 
 🏗️ Medallion Architecture
+- The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
 
-  The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
-
-🥉 Bronze Layer
-- Stores raw, unprocessed data directly ingested from source systems.
-- Data Source: CSV files from ERP and CRM systems.
-- Acts as a data landing zone.
-
-🥈 Silver Layer
-- Performs data cleansing, type conversion, standardization, and deduplication.
-- Joins and enriches data across source systems.
-- Provides clean, business-conformed data ready for modeling.
-
-🥇 Gold Layer
-- Contains business-ready data modeled using a star schema (fact and dimension tables).
-- Optimized for reporting, dashboards, and advanced analytics.
+  🥉 Bronze Layer
+  - Stores raw, unprocessed data directly ingested from source systems.
+  - Data Source: CSV files from ERP and CRM systems.
+  - Acts as a data landing zone.
+  
+  🥈 Silver Layer
+  - Performs data cleansing, type conversion, standardization, and deduplication.
+  - Joins and enriches data across source systems.
+  - Provides clean, business-conformed data ready for modeling.
+  
+  🥇 Gold Layer
+  - Contains business-ready data modeled using a star schema (fact and dimension tables).
+  - Optimized for reporting, dashboards, and advanced analytics.
 
 ![Architecture](Documentation/2.Architecture.PNG)
 
 🔁 ETL Pipelines 
-This project implements custom ETL pipelines using T-SQL:
-- Extract: Load raw data from CSV files into the Bronze layer.
-- Transform: Clean, standardize, and join data in the Silver layer.
-- Load: Populate analytical models and aggregated tables in the Gold layer.
+- This project implements custom ETL pipelines using T-SQL:
+  - Extract: Load raw data from CSV files into the Bronze layer.
+  - Transform: Clean, standardize, and join data in the Silver layer.
+  - Load: Populate analytical models and aggregated tables in the Gold layer.
 
 ![ETL](Documentation/1.ETL.PNG)
 
