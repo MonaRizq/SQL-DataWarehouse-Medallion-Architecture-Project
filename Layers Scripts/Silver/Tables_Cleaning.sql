@@ -108,13 +108,10 @@ various quality checks for data consistency, accuracy, and standardization acros
               from bronze.crm_cust_info
               where cst_id is not null) as T 
     		where rn = 1;
-------------------------------------------------------------------------------------------------------
-
 -- ===============================================================================
 -- Checking data quality after Data Cleaning and Loading it into silver layer 
 -- Investigate and resolve any discrepancies found during the checks.
 -- ===============================================================================
-
 
 -- 1.Check for NULLs or Duplicates in Primary Key
 -- Expectation: No Results
@@ -138,6 +135,7 @@ various quality checks for data consistency, accuracy, and standardization acros
 --4.Final Check of data in Silver Layer
     select * from silver.crm_cust_info;
 ------------------------------------------------------------------------------------------------------
+
 -- ====================================================================
 --  'silver.crm_prd_info'
 -- ====================================================================
@@ -305,8 +303,6 @@ various quality checks for data consistency, accuracy, and standardization acros
         cast(
             lead (prd_start_dt,1) over (partition by prd_key order by prd_start_dt)-1 as date) as prd_end_dt  --Data enrichment (adding value to enhance our dataset for analysis data)
     from bronze.crm_prd_info;
-
-
 -- ===============================================================================
 -- Checking data quality after Data Cleaning and Loading it into silver layer 
 -- Investigate and resolve any discrepancies found during the checks.
@@ -329,25 +325,386 @@ select prd_cost
 from silver.crm_prd_info
 where prd_cost is null or prd_cost < 0;
 ---------------------------------------------------------------------------------------------------------------------
+
 -- ====================================================================
---  'silver.crm_prd_info'
+--  'silver.crm_sales_details'
 -- ====================================================================
+--we will not check duplicates in data as this tables has measure and normally will have duplicates
+    SELECT sls_ord_num,
+              sls_prd_key,
+              sls_cust_id,
+              sls_order_dt,
+              sls_ship_dt,
+              sls_due_dt,
+              sls_sales,
+              sls_quantity,
+              sls_price
+        FROM bronze.crm_sales_details;
+
+--1.check white spaces in text column
+    SELECT sls_ord_num
+    FROM bronze.crm_sales_details
+    where sls_ord_num <> trim(sls_ord_num);
+
+    select * from Silver.crm_cust_info;
+
+--2.Check if any prd key not exist on product table (refrenetial integrity)
+    SELECT sls_ord_num,
+          sls_prd_key,
+          sls_cust_id,
+          sls_order_dt,
+          sls_ship_dt,
+          sls_due_dt,
+          sls_sales,
+          sls_quantity,
+          sls_price
+    FROM bronze.crm_sales_details
+    where sls_prd_key not in (select prd_key from silver.crm_prd_info);
+
+    --same for customer 
+    SELECT sls_ord_num,
+          sls_prd_key,
+          sls_cust_id,
+          sls_order_dt,
+          sls_ship_dt,
+          sls_due_dt,
+          sls_sales,
+          sls_quantity,
+          sls_price
+    FROM bronze.crm_sales_details
+    where sls_cust_id not in (select cst_id from silver.crm_cust_info);
+
+--3.change date tables from int to dates
+    --first will check if there any zeros and make it null
+    select 
+    nullif(sls_order_dt,0)
+    from bronze.crm_sales_details
+    where sls_order_dt <= 0;
+
+    --check len of charchters as it should be 8 num to could convert it to date
+    select 
+    nullif(sls_order_dt,0)
+    from bronze.crm_sales_details
+    where len(sls_order_dt) <> 8;
+
+    --check max value to make sure of date boundries
+    select 
+    nullif(sls_order_dt,0)
+    from bronze.crm_sales_details
+    where sls_order_dt > 20500101;
+
+
+    SELECT sls_ord_num,
+          sls_prd_key,
+          sls_cust_id,
+    	  case when sls_order_dt = 0 or len(sls_order_dt) <>8 then null
+    			else cast(cast(sls_order_dt as varchar) as date)  --we cant change directlry from int to date we should change to string first
+    			end as sls_order_dt,
+    	  case when sls_ship_dt = 0 or len(sls_ship_dt) <>8 then null
+    			else cast(cast(sls_ship_dt as varchar) as date)  
+    			end as sls_ship_dt,
+    	  case when sls_due_dt = 0 or len(sls_due_dt) <>8 then null
+    			else cast(cast(sls_due_dt as varchar) as date)  
+    			end as sls_due_dt,
+          sls_sales,
+          sls_quantity,
+          sls_price
+    FROM bronze.crm_sales_details;
+
+    --will do same steps for the other 2 columns
+    select 
+    nullif(sls_ship_dt,0)
+    from bronze.crm_sales_details
+    where len(sls_ship_dt) <> 8
+    or sls_ship_dt <=0
+    or sls_ship_dt > 20500101 
+    or sls_ship_dt < 19000101;
+    -- no issue found but will apply same rules incase any issue in the future
+
+    select 
+    nullif(sls_due_dt,0)
+    from bronze.crm_sales_details
+    where len(sls_due_dt) <> 8
+    or sls_due_dt <=0
+    or sls_due_dt > 20500101 
+    or sls_due_dt < 19000101;
+
+--4.check for invalid date orders
+    select *
+    from bronze.crm_sales_details
+    where sls_order_dt > sls_due_dt or sls_order_dt > sls_ship_dt;
+
+    --apply below business rules
+    --1. sum sales = Q * price
+    --2. no negative, nulls or zeros
+    SELECT
+          sls_sales as old_sls_sales,
+          sls_quantity,
+          sls_price as old_sls_price, 
+    	  case when sls_sales <> sls_quantity * abs(sls_price) or sls_sales is null or sls_sales <= 0 
+    				then sls_quantity * abs(sls_price)  --recalculate sls_sales if any issue in data
+    			    else sls_sales
+    			    end as sls_sales,
+    	  case when sls_price is null or sls_price <=0 
+    				then sls_sales / nullif (sls_quantity,0)
+    			    else sls_price                         --recalculate sls_sales if any issue in data
+    			    end as sls_price
+    FROM bronze.crm_sales_details
+    where sls_sales <> sls_quantity * sls_price
+    or sls_sales is null or sls_quantity is null or sls_price is null
+    or sls_sales <= 0 or sls_quantity <= 0  or sls_price <= 0 
+    order by old_sls_sales ,sls_quantity ;
+-- ==============================================================================
+-- Update our query
+-- Insert based on select into in silver layer after cleaning data in above steps
+-- ==============================================================================   
+    insert into silver.crm_sales_details 
+        ( sls_ord_num,
+          sls_prd_key,
+          sls_cust_id,
+          sls_order_dt,
+          sls_ship_dt,
+          sls_due_dt,
+          sls_sales,
+          sls_quantity,
+          sls_price
+        )
+    SELECT sls_ord_num,
+          sls_prd_key,
+          sls_cust_id,
+    	  case when sls_order_dt = 0 or len(sls_order_dt) <>8 then null
+    			else cast(cast(sls_order_dt as varchar) as date)
+    			end as sls_order_dt,
+    	  case when sls_ship_dt = 0 or len(sls_ship_dt) <>8 then null
+    			else cast(cast(sls_ship_dt as varchar) as date)  
+    			end as sls_ship_dt,
+    	  case when sls_due_dt = 0 or len(sls_due_dt) <>8 then null
+    			else cast(cast(sls_due_dt as varchar) as date)  
+    			end as sls_due_dt,
+    	  case when sls_sales <> sls_quantity * abs(sls_price) or sls_sales is null or sls_sales <= 0 
+    				then sls_quantity * abs(sls_price)
+    			else sls_sales
+    			end as sls_sales,
+    	  sls_quantity,
+    	  case when sls_price is null or sls_price <=0 
+    				then sls_sales / nullif (sls_quantity,0)
+    			else sls_price
+    			end as sls_price
+    FROM bronze.crm_sales_details;
+-- ===============================================================================
+-- Checking data quality after Data Cleaning and Loading it into silver layer 
+-- Investigate and resolve any discrepancies found during the checks.
+-- ===============================================================================
+    select * from silver.crm_sales_details;
+    
+    SELECT
+          sls_sales as sls_sales,
+          sls_quantity,
+          sls_price 
+    FROM silver.crm_sales_details
+    where sls_sales <> sls_quantity * sls_price
+    or sls_sales is null or sls_quantity is null or sls_price is null
+    or sls_sales <= 0 or sls_quantity <= 0  or sls_price <= 0 
+    order by sls_sales ,sls_quantity ;
+
+------------------------------------------------------------------------------------------------------------
+-- ====================================================================
+-- 'silver.erp_cust_az12'
+-- we will connect this table with crm_cust_info so we should make sure cst_key and cid in 2 tables are matched
+-- ====================================================================
+--1.we will find there is char should be removed from cid in some rows
+    SELECT cid,
+          bdate,
+          gen
+    FROM bronze.erp_cust_az12;
+    
+    select cst_key from silver.crm_cust_info;
+
+    --Will remove extra char from cid column
+    SELECT cid,
+    	   case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end as cid,
+           bdate,
+           gen
+    FROM bronze.erp_cust_az12;
+
+    --check after removing if there any remaining unwanted char
+    SELECT 
+    	   case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end as cid,
+           bdate,
+           gen
+    FROM bronze.erp_cust_az12
+    where case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end not in (select distinct cst_key from silver.crm_cust_info);
+
+--2.check bdate if we have something out of date
+    SELECT distinct bdate
+    FROM bronze.erp_cust_az12
+    where bdate < '1924-01-01' or bdate > getdate();
+
+    --will replace data that we 100% sure is not correct which is future date
+    SELECT 
+    	   case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end as cid,
+    	   case when bdate > getdate() then null
+    	        else bdate
+    			end as bdate,
+           gen
+    FROM bronze.erp_cust_az12;
+
+--3.check gender consistency 
+    select distinct gen
+    from bronze.erp_cust_az12;
+
+--update column and make it constant
+    SELECT 
+    	   case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end as cid,
+    	   case when bdate > getdate() then null
+    	        else bdate
+    			end as bdate,
+    	   case when upper(trim(gen)) in('FEMALE', 'F') then 'Female'
+    			when upper(trim(gen)) in('MALE', 'M') then 'Male'
+    			else gen
+    			end as gen
+    FROM bronze.erp_cust_az12;
+
+--Check after update
+    select distinct gen as old_gen,
+    	   case when upper(trim(gen)) in('FEMALE', 'F') then 'Female'
+    			when upper(trim(gen)) in('MALE', 'M') then 'Male'
+    			else 'N/A'
+    			end as gen
+    from bronze.erp_cust_az12;
+-- ==============================================================================
+-- Update our query
+-- Insert based on select into in silver layer after cleaning data in above steps
+-- ==============================================================================  
+    Insert into silver.erp_cust_az12 (cid,bdate,gen)
+    SELECT 
+    	   case when cid like 'NAS%' then substring(cid,4,len(cid)) 
+    	        else cid 
+    	        end as cid,
+    	   case when bdate > getdate() then null
+    	        else bdate
+    			end as bdate,
+    	   case when upper(trim(gen)) in('FEMALE', 'F') then 'Female'
+    			when upper(trim(gen)) in('MALE', 'M') then 'Male'
+    			else 'N/A'
+    			end as gen
+    FROM bronze.erp_cust_az12;
+-- ===============================================================================
+-- Checking data quality after Data Cleaning and Loading it into silver layer 
+-- Investigate and resolve any discrepancies found during the checks.
+-- ===============================================================================
+--1.Check data qulaity 
+    SELECT 
+    	   cid
+           bdate,
+           gen
+    FROM silver.erp_cust_az12
+    where cid not in  (select distinct cst_key from silver.crm_cust_info);
+
+-- 2.Identify Out-of-Range Dates
+-- Expectation: Birthdates between 1924-01-01 and Today
+    SELECT distinct bdate
+    FROM silver.erp_cust_az12
+    where bdate > getdate();
+
+-- 3.Data Standardization & Consistency
+select distinct gen
+from silver.erp_cust_az12;
+
+select * from silver.erp_cust_az12;
+
+------------------------------------------------------------------------------------------------------------
+-- ====================================================================
+--  'silver.erp_loc_a101'
+-- we will connect this table with crm_cust_info so we should make sure cst_key and cid in 2 tables are matched
+-- ====================================================================
+    SELECT cid,
+           cntry
+      FROM bronze.erp_loc_a101;
+    
+    select cst_key from silver.crm_cust_info;
+
+--1.Replace unmatched atring
+    SELECT replace(cid, '-','') cid,
+           cntry
+      FROM bronze.erp_loc_a101;
+
+    --Make sure they are matched
+    SELECT replace(cid, '-','') cid,
+           cntry
+    FROM bronze.erp_loc_a101
+    where replace(cid, '-','') not in (select cst_key from silver.crm_cust_info);
+
+--2.Check data consistency in cntry
+    select distinct cntry
+    from bronze.erp_loc_a101;
+
+    --Make data consistent
+    select distinct cntry as old_cntry,
+    	   case when upper(trim(cntry)) in ('DE', 'Germany') then 'Germany'
+    			when upper(trim(cntry)) in ('US', 'United States','USA') then 'United States'
+    			when upper(trim(cntry)) = '' or cntry is null then 'N/A'
+    				 else trim(cntry)
+    			     end as cntry
+    from bronze.erp_loc_a101
+    order by cntry;
+-- ==============================================================================
+-- Update our query
+-- Insert based on select into in silver layer after cleaning data in above steps
+-- ==============================================================================   
+    Insert into silver.erp_loc_a101 (cid, cntry)
+    SELECT replace(cid, '-','') cid,
+    	   case when upper(trim(cntry)) in ('DE', 'Germany') then 'Germany'
+    			when upper(trim(cntry)) in ('US', 'United States','USA') then 'United States'
+    			when upper(trim(cntry)) = '' or cntry is null then 'N/A'
+    				 else trim(cntry)
+    			end as cntry
+      FROM bronze.erp_loc_a101;
+-- ===============================================================================
+-- Checking data quality after Data Cleaning and Loading it into silver layer 
+-- Investigate and resolve any discrepancies found during the checks.
+-- ===============================================================================
+    SELECT cid,
+           cntry
+     FROM silver.erp_loc_a101;
+    select cst_key from silver.crm_cust_info;
+
+-- Data Standardization & Consistency
+    select distinct cntry
+    from silver.erp_loc_a101
+    order by cntry;
+    
+    select * from silver.erp_loc_a101;
+
+------------------------------------------------------------------------------------------------------------
+-- ====================================================================
+--  'silver.erp_px_cat_g1v2'
+-- ====================================================================
+
+
+
+
 -- ==============================================================================
 -- Update our query
 -- Insert based on select into in silver layer after cleaning data in above steps
 -- ==============================================================================   
 
+
+
 -- ===============================================================================
 -- Checking data quality after Data Cleaning and Loading it into silver layer 
 -- Investigate and resolve any discrepancies found during the checks.
 -- ===============================================================================
-
-
-
-
-
-
-
 
     
 
