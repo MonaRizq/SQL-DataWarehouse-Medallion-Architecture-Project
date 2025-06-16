@@ -46,25 +46,41 @@ This project implements custom ETL pipelines using T-SQL:
 - Combines data from ERP (e.g., orders, customers) and CRM (e.g., leads, accounts).
 - Uses keys, matching logic, and business rules to integrate datasets into unified entities.
 - Enables a 360-degree view of customer and sales performance.
-- 
+  
 ![Data Integration](Documentation/3.Data_Integration.PNG)
 
-## Data Modeling 
-Create Star Schema by developing fact and dimension tables optimized for analytical queries.
+🔎 Data Lineage
+- Full visibility of data flow from source to different layers.
+
+![Data Lineage](Documentation/4.Data_Lineage.PNG)
+
+
+📐 Data Modeling 
+- Create Star Schema by developing fact and dimension tables optimized for analytical queries.
+- Fact Tabe: Sales table
+- Dimenstions Tables: Product, Customer
 
 ![Data Modelling](Documentation/5.Star_Schema.PNG)
 
 
----
-#### Objective
-Develop a modern data warehouse using SQL Server to consolidate sales data, enabling analytical reporting and informed decision-making.
+🎯 Project Objectives
+- Build a modern SQL-based data warehouse.
+- Ingest and integrate data from multiple CSV-based systems.
+- Apply data quality, standardization, and modeling best practices.
+- Deliver a query-ready, business-friendly model.
 
 #### Specifications
-- **Data Sources**: Import data from two source systems (ERP and CRM) provided as CSV files.
-- **Data Quality**: Cleanse and resolve data quality issues prior to analysis.
-- **Integration**: Combine both sources into a single, user-friendly data model designed for analytical queries.
-- **Scope**: Focus on the latest dataset only; historization of data is not required.
-- **Documentation**: Provide clear documentation of the data model to support both business stakeholders and analytics teams.
+| Category             | Details                                                               |
+| -------------------- | --------------------------------------------------------------------- |
+| **Data Sources**     | CSV files from ERP and CRM systems                                    |
+| **Platform**         | Microsoft SQL Server                                                  |
+| **ETL**              | Custom T-SQL scripts and procedures                                   |
+| **Data Quality**     | Handled in Silver Layer: deduplication, type casting, standardization |
+| **Data Integration** | Unified view combining ERP and CRM customer data                      |
+| **Scope**            | Latest data only (no historization required)                          |
+| **Lineage**          | Structured ETL layers with transformation traceability                |
+| **Documentation**    | Architecture diagrams, schema documentation, and ETL logic            |
 
----
-
+🙋‍♂️ Author
+- [Mona Rizq]
+- Data & Analytics Engineer
