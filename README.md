@@ -25,6 +25,12 @@ This process include: Extracting, transforming, and loading data from source sys
 
 ![ETL](Documentation/1.ETL.PNG)
 
+## Data Modeling 
+Create Star Schema by developing fact and dimension tables optimized for analytical queries.
+
+![Data Modelling](Documentation/5.Star_Schema.PNG)
+
+
 ---
 #### Objective
 Develop a modern data warehouse using SQL Server to consolidate sales data, enabling analytical reporting and informed decision-making.
