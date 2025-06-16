@@ -106,4 +106,135 @@ Script Purpose:
     select * from gold.dim_customers
     select distinct gender from gold.dim_customers;
 
+-- Check for Uniqueness of Customer Key in gold.dim_customers
+-- Expectation: No results 
+    SELECT 
+        customer_key,
+        COUNT(*) AS duplicate_count
+    FROM gold.dim_customers
+    GROUP BY customer_key
+    HAVING COUNT(*) > 1;
+------------------------------------------------------------------------------------------------------
+--===============================================================================
+  --Create product Dimenstion
+  --it is slowley changing dimension
+--===============================================================================
+    select * from silver.crm_prd_info;
+    select * from silver.erp_px_cat_g1v2;
+
+--1.we will analysis here the current data so will filter all historical data and that is depend on the business requirments
+--2..make sure no duplicate
+    select prd_id, count(*)
+    from (
+    select 
+    	pr.prd_id,
+    	pr.cat_id,
+    	pr.prd_key,
+    	pr.prd_nm,
+    	pr.prd_cost,
+    	pr.prd_line,
+    	pr.prd_start_dt,
+    	ca.cat,
+    	ca.subcat,
+    	ca.maintenance
+    from silver.crm_prd_info pr
+    left join silver.erp_px_cat_g1v2 ca
+    	 on pr.cat_id = ca.id
+    where prd_end_dt is null) t                --filter historical data
+    group by prd_id
+    having count(*) > 1;
+
+--3.Sort columns and rename them
+    select 
+    	pr.prd_id as product_id,
+    	pr.prd_key as product_number,
+    	pr.prd_nm as product_name,
+    	pr.cat_id as category_id,
+    	ca.cat as category,
+    	ca.subcat as subcategory,
+    	ca.maintenance,
+    	pr.prd_cost as cost,
+    	pr.prd_line as line,
+    	pr.prd_start_dt as start_date
+    from silver.crm_prd_info pr
+    left join silver.erp_px_cat_g1v2 ca
+    	 on pr.cat_id = ca.id
+    where prd_end_dt is null
+
+--Create view dimenstion and surrgoate key
+    create view gold.dim_products
+    as
+    select 
+    	ROW_NUMBER() over(order by pr.prd_start_dt, pr.prd_key) as product_key,
+    	pr.prd_id as product_id,
+    	pr.prd_key as product_number,
+    	pr.prd_nm as product_name,
+    	pr.cat_id as category_id,
+    	ca.cat as category,
+    	ca.subcat as subcategory,
+    	ca.maintenance,
+    	pr.prd_cost as cost,
+    	pr.prd_line as line,
+    	pr.prd_start_dt as start_date
+    from silver.crm_prd_info pr
+    left join silver.erp_px_cat_g1v2 ca
+    	 on pr.cat_id = ca.id
+    where prd_end_dt is null
+
+    select * from gold.dim_products
+        
+-- Check for Uniqueness of Product Key in gold.dim_products
+-- Expectation: No results 
+    SELECT 
+        product_key,
+        COUNT(*) AS duplicate_count
+    FROM gold.dim_products
+    GROUP BY product_key
+    HAVING COUNT(*) > 1;
+--------------------------------------------------------------------------------------------------------------
+-- ====================================================================
+-- Create fact sales
+-- ====================================================================
+
+--1.check tables that we will join with fact_sales and replace business key with surrogate key
+    select * from silver.crm_sales_details;
+    select * from gold.dim_products;
+    
+    select * from silver.crm_sales_details;
+    select * from gold.dim_customers;
+
+--Make data lookup to replace business keys for customer and product with surrgoate key
+    Create view gold.fact_sales
+    as
+    select 
+    	s.sls_ord_num as order_number,
+    	pr.product_key,
+    	cu.customer_key,
+    	s.sls_order_dt as order_date,
+    	s.sls_ship_dt as ship_date,
+    	s.sls_due_dt as due_date,
+    	s.sls_sales as sales_amount,
+    	s.sls_quantity as quantity,
+    	s.sls_price as price
+    from silver.crm_sales_details s
+    left join gold.dim_products pr
+    	on s.sls_prd_key = pr.product_number
+    left join gold.dim_customers cu
+    	on s.sls_cust_id = cu.customer_id
+        
+ -- Check the data model connectivity between fact and dimensions
+    SELECT * 
+    FROM gold.fact_sales f
+    LEFT JOIN gold.dim_customers c
+    ON c.customer_key = f.customer_key
+    LEFT JOIN gold.dim_products p
+    ON p.product_key = f.product_key
+    WHERE p.product_key IS NULL OR c.customer_key IS NULL  
+    --------------------------------------------------------------------------------------------
+   --Check data in all views
+    select * from gold.fact_sales;
+    select * from gold.dim_customers
+    select * from gold.dim_products
+  --------------------------------------------------------------------------------------------
+
 
