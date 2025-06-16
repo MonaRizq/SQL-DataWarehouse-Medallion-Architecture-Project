@@ -1,18 +1,18 @@
 # SQL-DataWarehouse-Medallion-Architecture-Project
 A comprehensive Modern Data Architecture project using Medallion Architecture principles 
-— Bronze, Silver, and Gold layers 
-— built on Microsoft SQL Server with robust ETL pipelines, data integration, and data lineage tracking.
+- Bronze, Silver, and Gold layers
+- built on Microsoft SQL Server with robust ETL pipelines, data integration, and data lineage tracking.
 
 ---
 ## 📖 Project Overview
 
 This project demonstrates how to build a scalable and maintainable Data Warehouse using:
 
--✅ Medallion Architecture (Bronze → Silver → Gold)
--✅ T-SQL ETL Pipelines
--✅ Data Integration from multiple source systems
--✅ Data Lineage to track data transformations and dependencies
--✅ Star Schema Modeling for BI and analytics
+- ✅ Medallion Architecture (Bronze → Silver → Gold)
+- ✅ T-SQL ETL Pipelines
+- ✅ Data Integration from multiple source systems
+- ✅ Data Lineage to track data transformations and dependencies
+- ✅ Star Schema Modeling for BI and analytics
 
 🏗️ Medallion Architecture
 
