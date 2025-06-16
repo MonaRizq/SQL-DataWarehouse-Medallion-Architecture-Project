@@ -1,6 +1,15 @@
 # SQL-DataWarehouse-Medallion-Architecture-Project
 Modern Data Architecture Project | Medallion Architecture (Bronze, Silver, Gold) using MS SQL Server &amp; ETL Pipelines
 
+---
+## 📖 Project Overview
+
+This project involves:
+
+1. **Data Architecture**: Designing a Modern Data Warehouse Using Medallion Architecture **Bronze**, **Silver**, and **Gold** layers.
+2. **ETL Pipelines**: Extracting, transforming, and loading data from source systems into the warehouse.
+3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries.
+
 ## 🏗️ Data Architecture
 
 The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
@@ -11,14 +20,10 @@ The architecture for this project follows Medallion Architecture **Bronze**, **S
 
 ![Architecture](Documentation/2.Architecture.PNG)
 
----
-## 📖 Project Overview
+## ETL Pipelines 
+This process include: Extracting, transforming, and loading data from source systems into the warehouse.
 
-This project involves:
-
-1. **Data Architecture**: Designing a Modern Data Warehouse Using Medallion Architecture **Bronze**, **Silver**, and **Gold** layers.
-2. **ETL Pipelines**: Extracting, transforming, and loading data from source systems into the warehouse.
-3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries.
+![ETL](Documentation/1.ETL.PNG)
 
 ---
 #### Objective
