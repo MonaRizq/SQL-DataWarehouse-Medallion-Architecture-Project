@@ -16,7 +16,7 @@ This project demonstrates how to build a scalable and maintainable Data Warehous
 
 🏗️ Medallion Architecture
 
-The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
+  The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
 
 🥉 Bronze Layer
 - Stores raw, unprocessed data directly ingested from source systems.
@@ -34,13 +34,20 @@ The architecture for this project follows Medallion Architecture **Bronze**, **S
 
 ![Architecture](Documentation/2.Architecture.PNG)
 
-## ETL Pipelines 
+🔁 ETL Pipelines 
 This project implements custom ETL pipelines using T-SQL:
 - Extract: Load raw data from CSV files into the Bronze layer.
 - Transform: Clean, standardize, and join data in the Silver layer.
 - Load: Populate analytical models and aggregated tables in the Gold layer.
 
 ![ETL](Documentation/1.ETL.PNG)
+
+🧩 Data Integration
+- Combines data from ERP (e.g., orders, customers) and CRM (e.g., leads, accounts).
+- Uses keys, matching logic, and business rules to integrate datasets into unified entities.
+- Enables a 360-degree view of customer and sales performance.
+- 
+![Data Integration](Documentation/3.Data_Integration.PNG)
 
 ## Data Modeling 
 Create Star Schema by developing fact and dimension tables optimized for analytical queries.
