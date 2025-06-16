@@ -688,24 +688,52 @@ select * from silver.erp_cust_az12;
 
 ------------------------------------------------------------------------------------------------------------
 -- ====================================================================
---  'silver.erp_px_cat_g1v2'
+    --  'silver.erp_px_cat_g1v2'
+    --   Make sure that we can connect table with silver.crm_prd_info
 -- ====================================================================
+    SELECT id,
+          cat,
+          subcat,
+          maintenance
+      FROM bronze.erp_px_cat_g1v2;
+    
+    select * 
+    from silver.crm_prd_info;
 
+--1.Check unwanted spaces in other columns
+    select *
+    from bronze.erp_px_cat_g1v2
+    where maintenance <> trim(maintenance);
 
+--2.Check data constinecty 
+    select distinct cat
+    from bronze.erp_px_cat_g1v2;
+    
+    select distinct maintenance
+    from bronze.erp_px_cat_g1v2;
 
-
+    select distinct subcat
+    from bronze.erp_px_cat_g1v2;
 -- ==============================================================================
 -- Update our query
 -- Insert based on select into in silver layer after cleaning data in above steps
 -- ==============================================================================   
-
-
-
+--No issue found so will insert data into column in silver 
+    Insert into silver.erp_px_cat_g1v2
+        (   
+          id,
+          cat,
+          subcat,
+          maintenance
+        )
+    SELECT id,
+          cat,
+          subcat,
+          maintenance
+      FROM bronze.erp_px_cat_g1v2;
 -- ===============================================================================
 -- Checking data quality after Data Cleaning and Loading it into silver layer 
 -- Investigate and resolve any discrepancies found during the checks.
 -- ===============================================================================
-
-    
-
-
+    select * from silver.erp_px_cat_g1v2;
+------------------------------------------------------------------------------------------------------------
