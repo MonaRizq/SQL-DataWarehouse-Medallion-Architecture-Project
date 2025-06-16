@@ -1,22 +1,33 @@
 # SQL-DataWarehouse-Medallion-Architecture-Project
-Modern Data Architecture Project | Medallion Architecture (Bronze, Silver, Gold) using MS SQL Server &amp; ETL Pipelines
-
+A comprehensive Modern Data Architecture project using Medallion Architecture principles — Bronze, Silver, and Gold layers — built on Microsoft SQL Server with robust ETL pipelines, data integration, and data lineage tracking.
 ---
 ## 📖 Project Overview
 
-This project involves:
+This project demonstrates how to build a scalable and maintainable Data Warehouse using:
 
-1. **Data Architecture**: Designing a Modern Data Warehouse Using Medallion Architecture **Bronze**, **Silver**, and **Gold** layers.
-2. **ETL Pipelines**: Extracting, transforming, and loading data from source systems into the warehouse.
-3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries.
+✅ Medallion Architecture (Bronze → Silver → Gold)
+✅ T-SQL ETL Pipelines
+✅ Data Integration from multiple source systems
+✅ Data Lineage to track data transformations and dependencies
+✅ Star Schema Modeling for BI and analytics
 
-## 🏗️ Data Architecture
+🏗️ Medallion Architecture
 
 The architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
 
-1. **Bronze Layer**: Stores raw data as-is from the source systems. Data is ingested from CSV Files into SQL Server Database.
-2. **Silver Layer**: This layer includes data cleansing, standardization, and normalization processes to prepare data for analysis.
-3. **Gold Layer**: Houses business-ready data modeled into a star schema required for reporting and analytics.
+🥉 Bronze Layer
+Stores raw, unprocessed data directly ingested from source systems.
+Data Source: CSV files from ERP and CRM systems.
+Acts as a data landing zone.
+
+🥈 Silver Layer
+Performs data cleansing, type conversion, standardization, and deduplication.
+Joins and enriches data across source systems.
+Provides clean, business-conformed data ready for modeling.
+
+🥇 Gold Layer
+Contains business-ready data modeled using a star schema (fact and dimension tables).
+Optimized for reporting, dashboards, and advanced analytics.
 
 ![Architecture](Documentation/2.Architecture.PNG)
 
