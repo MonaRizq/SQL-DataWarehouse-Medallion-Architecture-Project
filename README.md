@@ -47,7 +47,7 @@ This project implements custom ETL pipelines using T-SQL:
 - Uses keys, matching logic, and business rules to integrate datasets into unified entities.
 - Enables a 360-degree view of customer and sales performance.
 - 
-![Data Integration](Documentation/3.Data_Integration.PNG)
+![Data Integration](Documentation/3.Data Integration.PNG)
 
 ## Data Modeling 
 Create Star Schema by developing fact and dimension tables optimized for analytical queries.
