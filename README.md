@@ -69,16 +69,16 @@ This project demonstrates how to build a scalable and maintainable Data Warehous
 - Deliver a query-ready, business-friendly model.
 
 #### Specifications
-| Category             | Details                                                               |
-| -------------------- | --------------------------------------------------------------------- |
-| **Data Sources**     | CSV files from ERP and CRM systems                                    |
-| **Platform**         | Microsoft SQL Server                                                  |
-| **ETL**              | Custom T-SQL scripts and procedures                                   |
-| **Data Quality**     | Handled in Silver Layer: deduplication, type casting, standardization |
-| **Data Integration** | Unified view combining ERP and CRM customer data                      |
-| **Scope**            | Latest data only (no historization required)                          |
-| **Lineage**          | Structured ETL layers with transformation traceability                |
-| **Documentation**    | Architecture diagrams, schema documentation, and ETL logic            |
+  | Category             | Details                                                               |
+  | -------------------- | --------------------------------------------------------------------- |
+  | **Data Sources**     | CSV files from ERP and CRM systems                                    |
+  | **Platform**         | Microsoft SQL Server                                                  |
+  | **ETL**              | Custom T-SQL scripts and procedures                                   |
+  | **Data Quality**     | Handled in Silver Layer: deduplication, type casting, standardization |
+  | **Data Integration** | Unified view combining ERP and CRM customer data                      |
+  | **Scope**            | Latest data only (no historization required)                          |
+  | **Lineage**          | Structured ETL layers with transformation traceability                |
+  | **Documentation**    | Architecture diagrams, schema documentation, and ETL logic            |
 
 🙋‍♂️ Author
 - [Mona Rizq]
