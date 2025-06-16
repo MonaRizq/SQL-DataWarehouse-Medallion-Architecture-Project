@@ -4,5 +4,5 @@ Modern Data Architecture Project | Medallion Architecture (Bronze, Silver, Gold)
 ## 🏗️ Data Architecture
 
 The data architecture for this project follows Medallion Architecture **Bronze**, **Silver**, and **Gold** layers:
-![Data Architecture](documentaion/2.Architecture.png)
+![2.Architecture](documentation/2.Architecture.png)
 
