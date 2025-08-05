@@ -31,7 +31,7 @@ This project demonstrates how to build a scalable and maintainable Data Warehous
   - Contains business-ready data modeled using a star schema (fact and dimension tables).
   - Optimized for reporting, dashboards, and advanced analytics.
 
-![Architecture](Documentation/2.Architecture.PNG)
+
 
 🔁 ETL Pipelines 
 - This project implements custom ETL pipelines using T-SQL:
